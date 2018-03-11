@@ -34,4 +34,16 @@ public class Server {
 	public Socket getSocket() {
 		return socket;
 	}
+	
+	public boolean close() {
+		printStream.close();
+		scanner.close();
+		try {
+			socket.close();
+			serverSocket.close();
+			return true;
+		} catch (IOException e) {
+			return false;
+		}
+	}
 }
