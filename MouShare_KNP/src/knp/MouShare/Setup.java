@@ -4,19 +4,25 @@ import java.awt.EventQueue;
 
 import javax.swing.JFrame;
 import javax.swing.JTextField;
+
+import knp.MouShare.misc.GetAvailableAddresses;
+
 import javax.swing.JLabel;
 import javax.swing.JRadioButton;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 import javax.swing.ButtonGroup;
-import javax.swing.JList;
 import javax.swing.JComboBox;
+
+import java.util.ArrayList;
+import javax.swing.JButton;
 
 public class Setup {
 
 	private JFrame frmSetup;
-	private JTextField serverKey;
+	private JTextField serverIP;
 	private final ButtonGroup masterSlave = new ButtonGroup();
+	private JComboBox<String> selfIPs;
 
 	/**
 	 * Launch the application.
@@ -39,6 +45,8 @@ public class Setup {
 	 */
 	public Setup() {
 		initialize();
+		
+		loadIPs(selfIPs);
 	}
 
 	/**
@@ -47,20 +55,21 @@ public class Setup {
 	private void initialize() {
 		frmSetup = new JFrame();
 		frmSetup.setTitle("Setup");
-		frmSetup.setBounds(100, 100, 450, 300);
+		frmSetup.setBounds(100, 100, 420, 267);
 		frmSetup.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frmSetup.getContentPane().setLayout(null);
 		
-		serverKey = new JTextField();
-		serverKey.setBounds(160, 187, 114, 19);
-		frmSetup.getContentPane().add(serverKey);
-		serverKey.setColumns(10);
+		serverIP = new JTextField();
+		serverIP.setBounds(160, 163, 114, 19);
+		frmSetup.getContentPane().add(serverIP);
+		serverIP.setColumns(10);
 		
 		JRadioButton masterMode = new JRadioButton("Run as Server");
 		masterMode.setSelected(true);
 		masterSlave.add(masterMode);
 		masterMode.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
+				loadIPs(selfIPs);
 			}
 		});
 		masterMode.setBounds(63, 53, 149, 23);
@@ -72,7 +81,7 @@ public class Setup {
 			public void actionPerformed(ActionEvent e) {
 			}
 		});
-		slaveMode.setBounds(63, 154, 149, 23);
+		slaveMode.setBounds(63, 130, 149, 23);
 		frmSetup.getContentPane().add(slaveMode);
 		
 		JLabel lblYourIp = new JLabel("Your IPs:");
@@ -80,11 +89,27 @@ public class Setup {
 		frmSetup.getContentPane().add(lblYourIp);
 		
 		JLabel lblServerIp = new JLabel("Server IP:");
-		lblServerIp.setBounds(73, 189, 70, 15);
+		lblServerIp.setBounds(73, 165, 70, 15);
 		frmSetup.getContentPane().add(lblServerIp);
 		
-		JComboBox comboBox = new JComboBox();
-		comboBox.setBounds(160, 81, 114, 24);
-		frmSetup.getContentPane().add(comboBox);
+		selfIPs = new JComboBox<String>();
+		selfIPs.setBounds(160, 81, 114, 24);
+		frmSetup.getContentPane().add(selfIPs);
+		
+		JButton btnNext = new JButton("Next");
+		btnNext.setBounds(287, 205, 117, 25);
+		frmSetup.getContentPane().add(btnNext);
+	}
+	
+	void loadIPs(JComboBox<String> box) {
+		if (box.getComponents().length != 0) box.removeAllItems();
+		ArrayList<String> list = GetAvailableAddresses.get();
+		for (String string : list) {
+			box.addItem(string);
+		}
+	}
+
+	protected JComboBox<String> getSelfIPs() {
+		return selfIPs;
 	}
 }

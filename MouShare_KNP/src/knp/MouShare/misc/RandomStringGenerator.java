@@ -1,6 +1,7 @@
-// Credits: https://stackoverflow.com/a/41762
+// Source:
+//   https://stackoverflow.com/a/41762
 
-package knp.MouShare;
+package knp.MouShare.misc;
 
 import java.util.UUID;
 
