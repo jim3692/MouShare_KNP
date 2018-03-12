@@ -1,11 +1,16 @@
 package knp.MouShare;
 
 import java.awt.EventQueue;
+import java.awt.Robot;
+import java.awt.Toolkit;
 
 import javax.swing.JFrame;
 import javax.swing.JTextField;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 
 import knp.MouShare.misc.GetAvailableAddresses;
+import knp.MouShare.misc.InputStreamReader;
 import knp.MouShare.net.Client;
 import knp.MouShare.net.Server;
 
@@ -22,7 +27,10 @@ import javax.swing.JComboBox;
 import java.util.ArrayList;
 import javax.swing.JButton;
 import javax.swing.JPanel;
+
+import java.awt.AWTException;
 import java.awt.CardLayout;
+import java.awt.Dimension;
 import java.awt.event.MouseMotionAdapter;
 import java.awt.event.MouseEvent;
 
@@ -159,16 +167,36 @@ public class Setup {
 	}
 	
 	Client client;
+	Robot robot;
 	void setupClient() {
 		try {
 			client = new Client(InetAddress.getByName(serverIP.getText()), 8520);
-			//client.getPrintStream().println("hello");
-			//client.close();
-			while (true)
-				System.out.println(client.getScanner().next());
+			robot = new Robot();
+			
+			Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+			double width = screenSize.getWidth();
+			double height = screenSize.getHeight();
+			
+			InputStreamReader iReader = new InputStreamReader(client.getSocket().getInputStream());
+			iReader.addChangeListener(new ChangeListener() {
+				
+				@Override
+				public void stateChanged(ChangeEvent e) {
+					String in = (String)e.getSource();
+					System.out.println(in);
+					String[] strings = in.split(";");
+					robot.mouseMove(Integer.parseInt(strings[0]), Integer.parseInt(strings[1]));
+					
+				}
+			});
+			
+			Thread t = new Thread( iReader );
+			t.start();
 		} catch (UnknownHostException e) {
 			e.printStackTrace();
 		} catch (IOException e) {
+			e.printStackTrace();
+		} catch (AWTException e) {
 			e.printStackTrace();
 		}
 	}
