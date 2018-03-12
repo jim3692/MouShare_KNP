@@ -105,12 +105,14 @@ public class Setup {
 		lblYourIp.setBounds(72, 71, 70, 15);
 		setupPanel.add(lblYourIp);
 		
-		JPanel panel = new JPanel();
-		parentPanel.add(panel, "name_44307525046091");
-		panel.addMouseMotionListener(new MouseMotionAdapter() {
+		JPanel mousePanel = new JPanel();
+		parentPanel.add(mousePanel, "name_44307525046091");
+		mousePanel.addMouseMotionListener(new MouseMotionAdapter() {
 			@Override
 			public void mouseMoved(MouseEvent e) {
-				server.getPrintStream().println(String.format("%d;%d", e.getX(), e.getY()));
+				float relX = (float)e.getX() / (float)(mousePanel.getWidth() - 1);
+				float relY = (float)e.getY() / (float)(mousePanel.getHeight() - 1);
+				server.getPrintStream().println(String.format("%f;%f", relX, relY));
 			}
 		});
 		masterMode.addActionListener(new ActionListener() {
@@ -127,6 +129,7 @@ public class Setup {
 				if (masterMode.isSelected()) {
 					setupServer();
 					((CardLayout)(parentPanel.getLayout())).next(parentPanel);
+					frmSetup.setResizable(true);
 				}
 				else setupClient();
 			}
@@ -160,7 +163,6 @@ public class Setup {
 	void setupServer() {
 		try {
 			server = new Server(8520);
-			//System.out.println(server.getScanner().next());
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -174,8 +176,8 @@ public class Setup {
 			robot = new Robot();
 			
 			Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
-			double width = screenSize.getWidth();
-			double height = screenSize.getHeight();
+			float width = (float)screenSize.getWidth();
+			float height = (float)screenSize.getHeight();
 			
 			InputStreamReader iReader = new InputStreamReader(client.getSocket().getInputStream());
 			iReader.addChangeListener(new ChangeListener() {
@@ -185,7 +187,11 @@ public class Setup {
 					String in = (String)e.getSource();
 					System.out.println(in);
 					String[] strings = in.split(";");
-					robot.mouseMove(Integer.parseInt(strings[0]), Integer.parseInt(strings[1]));
+					
+					float nextX = width * (float)Float.parseFloat(strings[0]);
+					float nextY = height * (float)Float.parseFloat(strings[1]);
+					
+					robot.mouseMove((int)nextX, (int)nextY);
 					
 				}
 			});
