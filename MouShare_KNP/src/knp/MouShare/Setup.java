@@ -1,38 +1,17 @@
 package knp.MouShare;
 
-import java.awt.EventQueue;
-import java.awt.Robot;
-import java.awt.Toolkit;
+import java.awt.*;
+import java.awt.event.*;
+import javax.swing.*;
+import javax.swing.border.*;
+import javax.swing.event.*;
+import java.net.*;
+import java.util.*;
+import java.io.*;
 
-import javax.swing.JFrame;
-import javax.swing.JTextField;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
-
-import knp.MouShare.misc.GetAvailableAddresses;
+import knp.MouShare.misc.*;
 import knp.MouShare.misc.InputStreamReader;
-import knp.MouShare.net.Client;
-import knp.MouShare.net.Server;
-
-import javax.swing.JLabel;
-import javax.swing.JRadioButton;
-import java.awt.event.ActionListener;
-import java.io.IOException;
-import java.net.InetAddress;
-import java.net.UnknownHostException;
-import java.awt.event.ActionEvent;
-import javax.swing.ButtonGroup;
-import javax.swing.JComboBox;
-
-import java.util.ArrayList;
-import javax.swing.JButton;
-import javax.swing.JPanel;
-
-import java.awt.AWTException;
-import java.awt.CardLayout;
-import java.awt.Dimension;
-import java.awt.event.MouseMotionAdapter;
-import java.awt.event.MouseEvent;
+import knp.MouShare.net.*;
 
 public class Setup {
 
@@ -105,14 +84,29 @@ public class Setup {
 		lblYourIp.setBounds(72, 71, 70, 15);
 		setupPanel.add(lblYourIp);
 		
+		JPanel serverPanel = new JPanel();
+		parentPanel.add(serverPanel, "name_7018014209702");
+		serverPanel.setLayout(null);
+		
 		JPanel mousePanel = new JPanel();
-		parentPanel.add(mousePanel, "name_44307525046091");
+		mousePanel.setBounds(12, 12, 392, 218);
+		mousePanel.setBorder(new LineBorder(new Color(0, 0, 0), 1, true));
+		serverPanel.add(mousePanel);
+		mousePanel.setLayout(null);
 		mousePanel.addMouseMotionListener(new MouseMotionAdapter() {
 			@Override
 			public void mouseMoved(MouseEvent e) {
-				float relX = (float)e.getX() / (float)(mousePanel.getWidth() - 1);
-				float relY = (float)e.getY() / (float)(mousePanel.getHeight() - 1);
-				server.getPrintStream().println(String.format("%f;%f", relX, relY));
+				float relX = (float)e.getX() / (float)(mousePanel.getWidth() - 1) * 100f;
+				float relY = (float)e.getY() / (float)(mousePanel.getHeight() - 1) * 100f;
+				
+				byte[] bytes = { (byte)-1, (byte)relX, (byte)relY, 0, 0x7f };
+				
+				try {
+					server.getPrintStream().write(bytes);
+				} catch (IOException e1) {
+					e1.printStackTrace();
+				}
+				
 			}
 		});
 		masterMode.addActionListener(new ActionListener() {
@@ -184,12 +178,11 @@ public class Setup {
 				
 				@Override
 				public void stateChanged(ChangeEvent e) {
-					String in = (String)e.getSource();
-					System.out.println(in);
-					String[] strings = in.split(";");
+					byte[] in = (byte[])e.getSource();
+					System.out.println(in[0] + ";" + in[1] + ";" + in[2]);
 					
-					float nextX = width * (float)Float.parseFloat(strings[0]);
-					float nextY = height * (float)Float.parseFloat(strings[1]);
+					float nextX = width * (float)in[0] / 100f;
+					float nextY = height * (float)in[1] / 100f;
 					
 					robot.mouseMove((int)nextX, (int)nextY);
 					
